@@ -23,11 +23,9 @@ class ViewController: UIViewController
         let digit = sender.currentTitle!
         if userIsInTheMiddleOfTypingANumber {
             display.text = display.text! + digit
-            history.text = history.text! + digit
         } else {
             userIsInTheMiddleOfTypingANumber = true
             display.text = digit
-            history.text = history.text! + " " + digit
         }
     }
     
@@ -39,18 +37,26 @@ class ViewController: UIViewController
         brain.clearStack()
     }
     
+    @IBAction func backspace() {
+        if userIsInTheMiddleOfTypingANumber {
+            if count(display.text!) >= 2 {
+                display.text = dropLast(display.text!)
+            } else {
+                display.text = "0"
+            }
+        }
+    }
+    
     
     @IBAction func point() {
         if !userIsInTheMiddleOfTypingANumber{
             display.text = "0"
-            history.text = history.text! + " 0"
             userIsInTheMiddleOfTypingANumber = true
         }
         if decimalPointNotUsed {
             display.text = display.text! + "."
             decimalPointNotUsed = false
         }
-        history.text = history.text! + "."
 
     }
     
@@ -85,6 +91,7 @@ class ViewController: UIViewController
     @IBAction func enter() {
         userIsInTheMiddleOfTypingANumber = false
         decimalPointNotUsed = true
+        history.text = history.text! + " " + display.text!
         if let result = brain.pushOperand(displayValue) {
             displayValue = result
         } else {
