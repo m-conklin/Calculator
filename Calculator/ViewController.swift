@@ -16,11 +16,19 @@ class ViewController: UIViewController
     
     var userIsInTheMiddleOfTypingANumber = false
     var decimalPointNotUsed = true
+    var computed = false
     
     var brain = CalculatorBrain()
 
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
+        if computed {
+            let range = advance(history.text!.endIndex, -2)..<history.text!.endIndex
+            var currentHistory = history.text!
+            currentHistory.removeRange(range)
+            history.text = currentHistory
+            computed = false
+        }
         if userIsInTheMiddleOfTypingANumber {
             display.text = display.text! + digit
         } else {
@@ -32,6 +40,7 @@ class ViewController: UIViewController
     @IBAction func clear() {
         userIsInTheMiddleOfTypingANumber = false
         decimalPointNotUsed = true
+        computed = false
         display.text = "0"
         history.text = ""
         brain.clearStack()
@@ -43,6 +52,30 @@ class ViewController: UIViewController
                 display.text = dropLast(display.text!)
             } else {
                 display.text = "0"
+            }
+        }
+    }
+    
+    
+    @IBAction func plusMinus(sender: UIButton) {
+        if computed {
+            let range = advance(history.text!.endIndex, -2)..<history.text!.endIndex
+            var currentHistory = history.text!
+            currentHistory.removeRange(range)
+            history.text = currentHistory
+        }
+        if userIsInTheMiddleOfTypingANumber {
+            display.text = "\(-1.0 * displayValue)"
+        } else {
+            let operation = sender.currentTitle!
+            history.text = history.text! +  " \(operation)"
+            
+            if let operation = sender.currentTitle {
+                if let result = brain.performOperation(operation) {
+                    displayValue = result
+                } else {
+                    displayValue = 0
+                }
             }
         }
     }
@@ -64,9 +97,16 @@ class ViewController: UIViewController
         if userIsInTheMiddleOfTypingANumber{
             enter()
         }
+        if computed {
+            let range = advance(history.text!.endIndex, -2)..<history.text!.endIndex
+            var currentHistory = history.text!
+            currentHistory.removeRange(range)
+            history.text = currentHistory
+        }
         display.text = "\(M_PI)"
         history.text = history.text! + " π"
         userIsInTheMiddleOfTypingANumber = false
+        computed = false
         decimalPointNotUsed = true
         brain.pushOperand(M_PI)
     }
@@ -77,7 +117,14 @@ class ViewController: UIViewController
             enter()
         }
         let operation = sender.currentTitle!
-        history.text = history.text! +  " \(operation)"
+        if computed {
+            let range = advance(history.text!.endIndex, -2)..<history.text!.endIndex
+            var currentHistory = history.text!
+            currentHistory.removeRange(range)
+            history.text = currentHistory
+        }
+        history.text = history.text! +  " \(operation) ="
+        computed = true
         
         if let operation = sender.currentTitle {
             if let result = brain.performOperation(operation) {
